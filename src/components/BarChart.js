@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import dayjs from 'dayjs';
 
-const BarChart = () => {
-    const month = '8';
+const BarChart = ({ Month }) => {
     const daysInMonth = 31;
-
     const [chartData, setChartData] = useState({
         options: {
             plotOptions: {
@@ -36,7 +34,7 @@ const BarChart = () => {
 
     const getDataForMonthAndCategory = (month, category) => {
         const data = JSON.parse(localStorage.getItem(category)) || [];
-        return data.filter(item => dayjs(item.date).format('M') === month);
+        return data.filter(item => dayjs(item.date).format('M') === month.toString());
     };
 
     const initializeArrayWithZeroes = (length) => {
@@ -44,8 +42,8 @@ const BarChart = () => {
     };
 
     const loadData = () => {
-        const resultIncome = getDataForMonthAndCategory(month, "Income");
-        const resultExpenses = getDataForMonthAndCategory(month, "Expenses");
+        const resultIncome = getDataForMonthAndCategory(Month, "Income");
+        const resultExpenses = getDataForMonthAndCategory(Month, "Expenses");
         const setDataIncome = initializeArrayWithZeroes(daysInMonth);
         const setDataExpenses = initializeArrayWithZeroes(daysInMonth);
 
@@ -79,10 +77,9 @@ const BarChart = () => {
             ]
         });
     };
-
     useEffect(() => {
         loadData();
-    }, [localStorage.getItem("Income"), localStorage.getItem("Expenses")]);
+    }, [localStorage.getItem("Income"), localStorage.getItem("Expenses"), Month]);
 
     return (
         <div id="chart">

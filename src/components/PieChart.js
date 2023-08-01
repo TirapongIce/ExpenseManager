@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import dayjs from 'dayjs';
-const PieChart = () => {
+const PieChart = ({ Month }) => {
+    const dataIncome = localStorage.getItem("Income") ; 
+    const dataExpenses = localStorage.getItem("Expenses") ; 
     const colorCodes = [
         "#42a4eb",
         "#f59608",
@@ -54,12 +56,12 @@ const PieChart = () => {
 
     const getDataForMonthAndCategory = (month, category) => {
         const data = JSON.parse(localStorage.getItem(category)) || [];
-        return data.filter(item => dayjs(item.date).format('M') === month);
+        return data.filter(item => dayjs(item.date).format('M')  === month.toString());
     };
 
     const loadData = () => {
         var setData = [];
-        const resultExpenses = getDataForMonthAndCategory("8", "Expenses");
+        const resultExpenses = getDataForMonthAndCategory(Month, "Expenses");
         for (let i = 0; i < 10; i++) {
             const sumCategory = resultExpenses.filter(item => item.category === (i + 1));
             setData.push(sumCategory.length > 0 ? sumCategory.length > 1 ?
@@ -74,7 +76,7 @@ const PieChart = () => {
     }
     useEffect(() => {
         loadData();
-    }, [localStorage.getItem("Income"), localStorage.getItem("Expenses")]);
+    }, [dataIncome,dataExpenses, Month]);
 
     return (
         <div id="chart" style={{ height: "313px" }} >

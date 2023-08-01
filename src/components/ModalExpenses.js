@@ -1,7 +1,7 @@
-import React, { useState , useEffect } from 'react';
-import { Form, Input, Modal, DatePicker, InputNumber, Button, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Modal, DatePicker, InputNumber, Button, Select, notification } from 'antd';
 import dayjs from 'dayjs';
-const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction}) => {
+const App = ({ displayModal, closeModal, dataCategory, actionID, clearAction }) => {
     const formRef = React.useRef(null);
     const handleCancel = () => {
         formRef.current?.resetFields();
@@ -19,10 +19,9 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
                 date: values.date,
                 description: values.description,
                 money: values.money,
-                category : values.category
+                category: values.category
             });
             localStorage.setItem("Expenses", JSON.stringify(setData));
-            handleCancel();
         }
         else {
             const result = JSON.parse(localStorage.getItem("Expenses")).filter(item => item.index === actionID);
@@ -36,8 +35,14 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
             localStorage.setItem("Expenses", JSON.stringify(editResult.sort((a, b) => {
                 return a.index - b.index;
             })));
-            handleCancel();
         }
+        notification.success({
+            message: 'Success',
+            description: 'Create Income successfully!',
+        });
+        setTimeout(() => {
+            handleCancel();
+        }, 300);
     };
 
     useEffect(() => {
@@ -46,15 +51,15 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
             formRef.current.setFieldsValue({
                 date: dayjs(result[0]["date"]),
                 money: result[0]["money"],
-                description: result[0]["description"] , 
-                category: result[0]["category"] 
+                description: result[0]["description"],
+                category: result[0]["category"]
             });
         }
     }
         , [actionID]);
     return (
         <>
-            <Modal  title={actionID !== 0 ? "Edit Expenses" : "Add Expenses"}  open={displayModal.expenses} footer={null} closable={false} maskClosable={false} centered>
+            <Modal title={actionID !== 0 ? "Edit Expenses" : "Add Expenses"} open={displayModal.expenses} footer={null} closable={false} maskClosable={false} centered>
                 <Form
                     ref={formRef}
                     name="basic"
@@ -103,7 +108,7 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
                             },
                         ]}
                     >
-                          <DatePicker
+                        <DatePicker
                             style={{ width: "100%" }}
                             format={'DD/MM/YYYY HH:mm:ss'}
                             def
@@ -118,8 +123,8 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
                     </Form.Item>
 
                     <Form.Item
-                       label="Money"
-                       name="money"
+                        label="Money"
+                        name="money"
                         rules={[
                             {
                                 required: true,
@@ -136,7 +141,6 @@ const App = ({ displayModal, closeModal, dataCategory , actionID , clearAction})
                         <Button type="primary" htmlType="submit">
                             Submit
                         </Button>
-
                     </div>
                 </Form>
             </Modal>

@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Layout, Card, Col, Row, Space, Table, Tag, Button, Select } from 'antd';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Layout, Card, Col, Row, Space, Table, Button, Select } from 'antd';
 import BarChart from '../components/BarChart';
 import PieChart from '../components/PieChart';
 import ModalIncome from '../components/ModalIncome';
 import ModalExpenses from '../components/ModalExpenses';
+import ModalDelete from '../components/ModalDelete';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import "./index.css"; // Import the styles.css file
 
 const { Header, Content } = Layout;
 
 const App = () => {
-
+  const dataIncome = localStorage.getItem("Income");
+  const dataExpenses = localStorage.getItem("Expenses");
   const [displayCard, setDisplayCard] = useState([
     { text: "Today Expend", value: 0 },
     { text: "Expend(Month)", value: 0 },
@@ -20,10 +23,13 @@ const App = () => {
   const [selectMonth, setSelectMonth] = useState([]);
   const [selectCategory, setSelectCategory] = useState([]);
   const [actionID, setActionID] = useState(0);
+  const [valueMonth, setValueMonth] = useState(dayjs(new Date()).format('M'));
   const [displayModal, setDisplayModal] = useState({
     income: false,
     expenses: false,
+    delete: false
   });
+  const [typeDelete, setTypeDelete] = useState("");
   const columnsIncome = [
     {
       title: 'No',
@@ -53,16 +59,27 @@ const App = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => {
-            setDisplayModal({
-              ...displayModal,
-              income: true,
-            });
-            setActionID(record.index);
-          }
-          }
-          >Edit</a>
-          <a>Delete</a>
+          <EditOutlined className='icon-click'
+            onClick={() => {
+              setDisplayModal({
+                ...displayModal,
+                income: true,
+              });
+              setActionID(record.index);
+            }
+            } />
+
+          <DeleteOutlined className='icon-click'
+            onClick={() => {
+              setDisplayModal({
+                ...displayModal,
+                delete: true,
+              });
+              setActionID(record.index);
+              setTypeDelete("Income");
+            }
+            }
+          />
         </Space>
       ),
     },
@@ -96,7 +113,7 @@ const App = () => {
       key: 'category',
       dataIndex: 'category',
       render: (item) => (
-        selectCategory[item]["label"]
+        selectCategory[item - 1]["label"]
       )
 
     },
@@ -105,21 +122,33 @@ const App = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => {
-            setDisplayModal({
-              ...displayModal,
-              expenses: true,
-            });
-            setActionID(record.index);
-          }
-          }
-          >Edit</a>
-          <a>Delete</a>
+
+          <EditOutlined className='icon-click'
+            onClick={() => {
+              setDisplayModal({
+                ...displayModal,
+                expenses: true,
+              });
+              setActionID(record.index);
+            }
+            } />
+
+          <DeleteOutlined className='icon-click'
+            onClick={() => {
+              setDisplayModal({
+                ...displayModal,
+                delete: true,
+              });
+              setActionID(record.index);
+              setTypeDelete("Expenses");
+            }
+            }
+          />
         </Space>
       ),
     },
   ];
-  const data = [];
+
 
   const onLoadSelectMonth = () => {
     const months = [
@@ -147,27 +176,46 @@ const App = () => {
     setSelectCategory(categoryOptions);
 
   }
+  const getDataForMonthAndCategory = (month, category) => {
+    const data = JSON.parse(localStorage.getItem(category)) || [];
+    return data.filter(item => dayjs(item.date).format('M') === month);
+  };
+  const loadData = useCallback(() => {
+    const resultExpenses = getDataForMonthAndCategory(dayjs(new Date()).format('M'), "Expenses");
+    const sumDay = resultExpenses.filter(item => dayjs(item.date).format('D') === dayjs(new Date()).format('D'));
+    const toDayExpend = sumDay.reduce((accumulator, object) => accumulator + object.money, 0);
+    const expendMonth = resultExpenses.reduce((accumulator, object) => accumulator + object.money, 0);
 
+    const expendYear = JSON.parse(dataExpenses)?.reduce((accumulator, object) => accumulator + object.money, 0) ?? 0;
+    const incomeYear = JSON.parse(dataIncome)?.reduce((accumulator, object) => accumulator + object.money, 0) ?? 0;
 
-
+    setDisplayCard([
+      { text: "Today Expend", value: toDayExpend },
+      { text: "Expend(Month)", value: expendMonth },
+      { text: "Expend(Year)", value: expendYear },
+      { text: "Income(Year)", value: incomeYear }
+    ]);
+  }, [dataIncome, dataExpenses]);
   useMemo(() => {
     onLoadSelectMonth();
     onLoadSelectCategory();
   }
     , []);
+  useEffect(() => {
+    loadData();
+  }, [dataIncome, dataExpenses, loadData]);
 
   return (
     <Layout>
 
       {/*  =================  Modal Add And Edit  =================*/}
-
       {displayModal.income ? <ModalIncome displayModal={displayModal} closeModal={setDisplayModal} actionID={actionID} clearAction={setActionID} /> : null}
       {displayModal.expenses ? <ModalExpenses displayModal={displayModal} closeModal={setDisplayModal} dataCategory={selectCategory} actionID={actionID} clearAction={setActionID} /> : null}
-
+      {displayModal.delete ? <ModalDelete displayModal={displayModal} closeModal={setDisplayModal} actionID={actionID} clearAction={setActionID} typeDelete={typeDelete} /> : null}
       {/* ========================================================= */}
 
       <Header className="header-container">
-        <h1 style={{ color: "#fff", textAlign: "center", margin: "0 auto" }}>Expense Manager</h1>
+        <h1 style={{ color: "#fff", textAlign: "center", margin: "0 auto", borderBottom: 0 }}>Expense Manager</h1>
       </Header>
       <Content
         style={{
@@ -190,22 +238,12 @@ const App = () => {
 
                     }}
                     placeholder={"Search By Month"}
-                    // onChange={handleChange}
+                    onChange={(e) => setValueMonth(e)}
                     options={selectMonth}
                   />
                 </Col>
-                <Col xs={24} xl={5} >
-                  <Select
-                    placeholder={"Search By Category"}
-                    style={{
-                      width: "100%",
-                      padding: 5
-                    }}
-                    // onChange={handleChange}
-                    options={selectCategory}
-                  />
-                </Col>
-                <Col xs={4} xl={14} style={{
+
+                <Col xs={4} xl={19} style={{
                   textAlign: "right", padding: 5
                 }}>
 
@@ -244,7 +282,7 @@ const App = () => {
               }}
             >
               <h1>Income and Expenses</h1>
-              <BarChart />
+              <BarChart Month={valueMonth} />
             </Card>
           </Col>
           <Col xs={24} xl={6} style={{ padding: "5px" }}>
@@ -254,7 +292,7 @@ const App = () => {
               }}
             >
               <h1>Category Expenses</h1>
-              <PieChart />
+              <PieChart Month={valueMonth} />
             </Card>
           </Col>
         </Row>
@@ -268,7 +306,7 @@ const App = () => {
             >
               <h1>Income History</h1>
               <Table columns={columnsIncome} dataSource={
-                !JSON.parse(localStorage.getItem("Income")) ? [] : JSON.parse(localStorage.getItem("Income"))
+                !JSON.parse(dataIncome) ? [] : JSON.parse(dataIncome)
               } style={{ width: "100%" }} scroll={{ x: true, y: 500 }} rowKey="index" />
             </Card>
           </Col>
@@ -282,17 +320,13 @@ const App = () => {
             >
               <h1>Expenses History</h1>
               <Table columns={columnsExpenses} dataSource={
-                !JSON.parse(localStorage.getItem("Expenses")) ? [] : JSON.parse(localStorage.getItem("Expenses"))
+                !JSON.parse(dataExpenses) ? [] : JSON.parse(dataExpenses)
               } style={{ width: "100%" }} scroll={{ x: true, y: 500 }} rowKey="index" />
             </Card>
           </Col>
         </Row>
       </Content>
-
-
     </Layout>
-
-
   );
 };
 export default App;

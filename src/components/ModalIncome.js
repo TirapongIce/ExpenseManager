@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Form, Input, Modal, DatePicker, InputNumber, Button } from 'antd';
+import React, {  useEffect } from 'react';
+import { Form, Input, Modal, DatePicker, InputNumber, Button , notification } from 'antd';
 import dayjs from 'dayjs';
 const App = ({ displayModal, closeModal, actionID , clearAction }) => {
 
@@ -22,7 +22,6 @@ const App = ({ displayModal, closeModal, actionID , clearAction }) => {
                 money: values.money,
             });
             localStorage.setItem("Income", JSON.stringify(setData));
-            handleCancel();
         }
         else {
             const result = JSON.parse(localStorage.getItem("Income")).filter(item => item.index === actionID);
@@ -35,8 +34,15 @@ const App = ({ displayModal, closeModal, actionID , clearAction }) => {
             localStorage.setItem("Income", JSON.stringify(editResult.sort((a, b) => {
                 return a.index - b.index;
             })));
-            handleCancel();
+           
         }
+        notification.success({
+            message: 'Success',
+            description: 'Create Income successfully!',
+          });
+          setTimeout(() => {
+          handleCancel();
+          }, 300);
     };
 
     useEffect(() => {
