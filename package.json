@@ -1,5 +1,5 @@
 {
-  "homepage": "https://tirapongice.github.io/ExpenseManager/",
+  "homepage": "http://tirapongice.github.io/ExpenseManager/",
   "name": "expense-manager",
   "version": "0.1.0",
   "private": true,
@@ -9,7 +9,6 @@
     "apexcharts": "^3.41.1",
     "date-fns": "^2.0.0-beta.5",
     "dayjs": "^1.11.9",
-    "gh-pages": "^5.0.0",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
@@ -20,8 +19,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "predeploy":"npm run build",
-    "deploy":"gh-pages -d build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -45,6 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.3.3"
+    "@types/react-router-dom": "^5.3.3",
+    "gh-pages": "^5.0.0"
   }
 }
