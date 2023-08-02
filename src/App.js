@@ -15,7 +15,7 @@ class App extends Component {
   render() {
     return (
       <Switch>
-        <Route exact path="/" component={PageIndex} />
+        <Route exact path="/ExpenseManager/" component={PageIndex} />
       </Switch>
     )
   }
