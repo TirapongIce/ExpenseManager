@@ -247,14 +247,14 @@ const App = () => {
                   textAlign: "right", padding: 5
                 }}>
 
-                  <Button type="primary" style={{ backgroundColor: "green", marginRight: "10px" }} onClick={() => {
+                  <Button type="primary" style={{ backgroundColor: "green", marginRight: "10px" ,border: "1px solid" }} onClick={() => {
                     setDisplayModal({
                       ...displayModal,
                       income: true,
                     });
                     setActionID(0);
                   }}>Add Income</Button>
-                  <Button type="primary" style={{ backgroundColor: "red" }}
+                  <Button type="primary" style={{ backgroundColor: "red"  ,border: "1px solid"}}
                     onClick={() => setDisplayModal({
                       ...displayModal,
                       expenses: true
